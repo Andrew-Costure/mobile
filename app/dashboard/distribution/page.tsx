@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Clock, Send, Save, Eye } from "lucide-react";
+import { Calendar, Clock, Send, Save, Eye, Settings, Edit } from "lucide-react";
 
 export default function CreatePostPage() {
   const [title, setTitle] = useState("");
@@ -73,7 +74,6 @@ export default function CreatePostPage() {
       return;
     }
 
-    // Prepare preview data
     const previewData = {
       title,
       content,
@@ -83,7 +83,6 @@ export default function CreatePostPage() {
       scheduleTime,
     };
 
-    // Convert files to a serializable format for preview
     const serializableFiles = uploadedFiles.map((file) => ({
       name: file.name,
       type: file.type,
@@ -95,7 +94,6 @@ export default function CreatePostPage() {
       uploadedFiles: serializableFiles,
     };
 
-    // Open preview in new window
     const previewUrl = `/preview?data=${encodeURIComponent(
       JSON.stringify(previewDataForUrl)
     )}`;
@@ -123,9 +121,7 @@ export default function CreatePostPage() {
 
     setIsSaving(true);
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
       toast({
         title: "Draft saved",
         description: "Your post has been saved as a draft",
@@ -142,7 +138,6 @@ export default function CreatePostPage() {
   };
 
   const handlePublishClick = () => {
-    console.log("handle publish click")
     if (!content.trim()) {
       toast({
         title: "Content required",
@@ -161,7 +156,6 @@ export default function CreatePostPage() {
       return;
     }
 
-    // Check if date and time are not selected
     if (!scheduleDate || !scheduleTime) {
       setShowPublishConfirm(true);
     } else {
@@ -174,7 +168,6 @@ export default function CreatePostPage() {
     setIsPublishing(true);
 
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const platformNames = selectedPlatforms
@@ -196,7 +189,6 @@ export default function CreatePostPage() {
         description: `Your post has been published to: ${platformNames}`,
       });
 
-      // Reset form
       setTitle("");
       setContent("");
       setSelectedPlatforms([]);
@@ -244,7 +236,6 @@ export default function CreatePostPage() {
 
     setIsPublishing(true);
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`);
@@ -254,7 +245,6 @@ export default function CreatePostPage() {
         description: `Your post will be published on ${scheduledDateTime.toLocaleString()}`,
       });
 
-      // Reset form
       setTitle("");
       setContent("");
       setSelectedPlatforms([]);
@@ -271,160 +261,203 @@ export default function CreatePostPage() {
       setIsPublishing(false);
     }
   };
+
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Create New Post</h1>
-        <p className="text-muted-foreground">
+    <div className="container mx-auto py-4 md:py-8 px-4 max-w-6xl">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">Create New Post</h1>
+        <p className="text-muted-foreground text-sm md:text-base">
           Create and publish content across multiple social media platforms
         </p>
       </div>
 
-      <div className="grid gap-6">
-        {/* Post Title */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Post Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="title">Title (Optional)</Label>
-              <Input
-                id="title"
-                placeholder="Enter a title for your post..."
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="editor" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="editor" className="flex items-center gap-2">
+            <Edit className="h-4 w-4" />
+            <span className="hidden sm:inline">Editor</span>
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            <span className="hidden sm:inline">Settings</span>
+          </TabsTrigger>
+          <TabsTrigger value="preview" className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            <span className="hidden sm:inline">Preview</span>
+          </TabsTrigger>
+        </TabsList>
 
-        {/* Platform Selection */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Publishing Platforms</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PlatformSelector
-              selectedPlatforms={selectedPlatforms}
-              onPlatformToggle={handlePlatformToggle}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Content Editor */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Content</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ContentEditor
-              content={content}
-              onContentChange={handleContentChange}
-              selectedPlatforms={selectedPlatforms}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Media Upload */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Media Attachments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <UploadMedia onMediaUpload={handleMediaUpload} />
-          </CardContent>
-        </Card>
-
-        {/* Scheduling */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Schedule Post (Optional)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="schedule-date">Date</Label>
-                <div className="relative mt-1">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <TabsContent value="editor" className="space-y-6">
+          <div className="grid gap-6">
+            {/* Post Title */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Post Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="title">Title (Optional)</Label>
                   <Input
-                    id="schedule-date"
-                    type="date"
-                    value={scheduleDate}
-                    onChange={(e) => setScheduleDate(e.target.value)}
-                    className="pl-10"
-                    min={new Date().toISOString().split("T")[0]}
+                    id="title"
+                    placeholder="Enter a title for your post..."
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="mt-1"
                   />
                 </div>
-              </div>
-              <div>
-                <Label htmlFor="schedule-time">Time</Label>
-                <div className="relative mt-1">
-                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="schedule-time"
-                    type="time"
-                    value={scheduleTime}
-                    onChange={(e) => setScheduleTime(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        {/* Action Buttons */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row gap-3 justify-between">
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={handleSaveDraft}
-                  disabled={isSaving}
-                  className="flex-1 sm:flex-none"
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  {isSaving ? "Saving..." : "Save Draft"}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 sm:flex-none"
-                  onClick={handlePreview}
-                >
+            {/* Content Editor */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Content</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ContentEditor
+                  content={content}
+                  onContentChange={handleContentChange}
+                  selectedPlatforms={selectedPlatforms}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Media Upload */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Media Attachments</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <UploadMedia onMediaUpload={handleMediaUpload} />
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <div className="grid gap-6">
+            {/* Platform Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Publishing Platforms</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PlatformSelector
+                  selectedPlatforms={selectedPlatforms}
+                  onPlatformToggle={handlePlatformToggle}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Scheduling */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Schedule Post (Optional)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="schedule-date">Date</Label>
+                    <div className="relative mt-1">
+                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="schedule-date"
+                        type="date"
+                        value={scheduleDate}
+                        onChange={(e) => setScheduleDate(e.target.value)}
+                        className="pl-10"
+                        min={new Date().toISOString().split("T")[0]}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="schedule-time">Time</Label>
+                    <div className="relative mt-1">
+                      <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="schedule-time"
+                        type="time"
+                        value={scheduleTime}
+                        onChange={(e) => setScheduleTime(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="preview" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Post Preview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <Eye className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground mb-4">
+                  Click the preview button to see how your post will look on different platforms
+                </p>
+                <Button onClick={handlePreview} disabled={!content.trim()}>
                   <Eye className="mr-2 h-4 w-4" />
-                  Preview
+                  Open Preview
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
-              <div className="flex gap-3">
-                {scheduleDate && scheduleTime && (
-                  <Button
-                    variant="secondary"
-                    onClick={handleSchedule}
-                    disabled={isPublishing}
-                    className="flex-1 sm:flex-none"
-                  >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {isPublishing ? "Scheduling..." : "Schedule Post"}
-                  </Button>
-                )}
+      {/* Action Buttons */}
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row gap-3 justify-between">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="outline"
+                onClick={handleSaveDraft}
+                disabled={isSaving}
+                className="flex-1 sm:flex-none"
+              >
+                <Save className="mr-2 h-4 w-4" />
+                {isSaving ? "Saving..." : "Save Draft"}
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 sm:flex-none"
+                onClick={handlePreview}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Preview
+              </Button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              {scheduleDate && scheduleTime && (
                 <Button
-                  onClick={handlePublishClick}
+                  variant="secondary"
+                  onClick={handleSchedule}
                   disabled={isPublishing}
                   className="flex-1 sm:flex-none"
                 >
-                  <Send className="mr-2 h-4 w-4" />
-                  {isPublishing ? "Publishing..." : "Publish Now"}
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {isPublishing ? "Scheduling..." : "Schedule Post"}
                 </Button>
-              </div>
+              )}
+              <Button
+                onClick={handlePublishClick}
+                disabled={isPublishing}
+                className="flex-1 sm:flex-none"
+              >
+                <Send className="mr-2 h-4 w-4" />
+                {isPublishing ? "Publishing..." : "Publish Now"}
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Publish Confirmation Dialog */}
       <AlertDialog
