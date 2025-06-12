@@ -16,12 +16,14 @@ import {
   BarChart3,
   Menu,
   X,
+  Palette,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { SignOutModal } from "@/components/auth/signout-modal";
+import { motion } from "framer-motion";
 
 const routes = [
   {
@@ -135,11 +137,6 @@ export function Sidebar() {
         </Button>
       </div>
 
-      {/* Theme Toggle - Top Right */}
-      <div className="fixed top-4 right-4 z-50">
-        <ThemeToggle />
-      </div>
-
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div 
@@ -185,11 +182,27 @@ export function Sidebar() {
             </div>
           </div>
           
+          {/* Theme Toggle Section */}
+          <div className="px-3 border-t pt-4">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+              <div className="flex items-center gap-2">
+                <Palette className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Theme</span>
+              </div>
+              <ThemeToggle />
+            </div>
+          </div>
+
           {/* Profile Section */}
-          <div className="mt-auto px-3 relative">
+          <div className="px-3 relative">
             {/* Profile Menu - Positioned above the profile button */}
             {isProfileMenuOpen && (
-              <div className="absolute bottom-full left-3 right-3 mb-2 bg-background border rounded-lg shadow-lg p-2 space-y-1 animate-in slide-in-from-bottom-2 duration-200 z-50">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute bottom-full left-3 right-3 mb-2 bg-background border rounded-lg shadow-lg p-2 space-y-1 z-50"
+              >
                 <Button
                   variant="ghost"
                   className={cn(
@@ -212,7 +225,7 @@ export function Sidebar() {
                   <LogOut className="h-5 w-5 mr-3" />
                   Sign Out
                 </Button>
-              </div>
+              </motion.div>
             )}
 
             {/* Profile Toggle Button */}
